@@ -11,8 +11,383 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Create Android project
+        run: |
+          mkdir -p app/src/main/java/com/ibrahimhakeem/teacherassistant
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "MosaedAlmoalem"
+          include(":app")
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.6.1' apply false
+          }
+          EOF
+
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          EOF
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.ibrahimhakeem.teacherassistant'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.ibrahimhakeem.teacherassistant'
+                  minSdk 23
+                  targetSdk 35
+                  versionCode 1
+                  versionName '1.0.0'
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+          }
+          EOF
+
+          cat > app/src/main/res/values/colors.xml <<'EOF'
+          <resources>
+              <color name="navy">#0B1F4D</color>
+              <color name="blue">#1769E0</color>
+              <color name="green">#20A36A</color>
+              <color name="background">#F4F7FB</color>
+          </resources>
+          EOF
+
+          cat > app/src/main/res/values/themes.xml <<'EOF'
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:colorAccent">@color/blue</item>
+                  <item name="android:statusBarColor">@color/navy</item>
+                  <item name="android:navigationBarColor">@color/navy</item>
+                  <item name="android:windowLightStatusBar">false</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/res/drawable/app_icon.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path
+                  android:fillColor="#0B1F4D"
+                  android:pathData="M0,0 L108,0 L108,108 L0,108 Z"/>
+              <path
+                  android:fillColor="#20A36A"
+                  android:pathData="M22,26 L86,26 L78,42 L30,42 Z"/>
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M28,49 L80,49 L80,82 L28,82 Z"/>
+              <path
+                  android:fillColor="#1769E0"
+                  android:pathData="M38,57 L70,57 L70,62 L38,62 Z"/>
+              <path
+                  android:fillColor="#1769E0"
+                  android:pathData="M38,68 L62,68 L62,73 L38,73 Z"/>
+          </vector>
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:theme="@style/AppTheme"
+                  android:label="مساعد المعلم"
+                  android:icon="@drawable/app_icon"
+                  android:allowBackup="true"
+                  android:supportsRtl="true">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:screenOrientation="portrait"
+                      android:exported="true">
+
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN"/>
+                          <category android:name="android.intent.category.LAUNCHER"/>
+                      </intent-filter>
+
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/java/com/ibrahimhakeem/teacherassistant/MainActivity.java <<'EOF'
+          package com.ibrahimhakeem.teacherassistant;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.graphics.Color;
+          import android.graphics.Typeface;
+          import android.view.Gravity;
+          import android.view.View;
+          import android.widget.*;
+
+          public class MainActivity extends Activity {
+
+              int NAVY = Color.rgb(11,31,77);
+              int BLUE = Color.rgb(23,105,224);
+              int GREEN = Color.rgb(32,163,106);
+              int BG = Color.rgb(244,247,251);
+
+              LinearLayout content;
+
+              TextView text(String value, int size) {
+                  TextView t = new TextView(this);
+                  t.setText(value);
+                  t.setTextSize(size);
+                  t.setTextColor(NAVY);
+                  t.setPadding(20,15,20,15);
+                  return t;
+              }
+
+              Button button(String value) {
+                  Button b = new Button(this);
+                  b.setText(value);
+                  b.setTextSize(14);
+                  b.setAllCaps(false);
+                  b.setTextColor(Color.WHITE);
+                  b.setBackgroundColor(BLUE);
+                  return b;
+              }
+
+              @Override
+              public void onCreate(Bundle state) {
+                  super.onCreate(state);
+                  getWindow().setStatusBarColor(NAVY);
+                  home();
+              }
+
+              void home() {
+
+                  LinearLayout root = new LinearLayout(this);
+                  root.setOrientation(LinearLayout.VERTICAL);
+                  root.setBackgroundColor(BG);
+                  root.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+
+                  LinearLayout header = new LinearLayout(this);
+                  header.setOrientation(LinearLayout.VERTICAL);
+                  header.setPadding(20,25,20,25);
+                  header.setBackgroundColor(NAVY);
+
+                  TextView title = text("🧪  مساعد المعلم",25);
+                  title.setTextColor(Color.WHITE);
+                  title.setTypeface(null, Typeface.BOLD);
+
+                  TextView teacher = text(
+                      "أ. إبراهيم عبد الحكيم\nمعلم العلوم والكيمياء",
+                      14
+                  );
+                  teacher.setTextColor(Color.WHITE);
+
+                  header.addView(title);
+                  header.addView(teacher);
+                  root.addView(header);
+
+                  ScrollView scroll = new ScrollView(this);
+                  content = new LinearLayout(this);
+                  content.setOrientation(LinearLayout.VERTICAL);
+                  content.setPadding(15,15,15,15);
+                  scroll.addView(content);
+                  root.addView(scroll,
+                      new LinearLayout.LayoutParams(
+                          -1,0,1
+                      )
+                  );
+
+                  addDashboard();
+
+                  LinearLayout nav = new LinearLayout(this);
+                  nav.setGravity(Gravity.CENTER);
+                  nav.setBackgroundColor(Color.WHITE);
+
+                  String[] items = {
+                      "🏠 الرئيسية",
+                      "👨‍🎓 الطلاب",
+                      "📚 الحصص",
+                      "✅ الحضور",
+                      "💰 الحسابات"
+                  };
+
+                  for(String item : items) {
+                      Button b = new Button(this);
+                      b.setText(item);
+                      b.setTextSize(11);
+                      b.setTextColor(NAVY);
+                      b.setAllCaps(false);
+
+                      nav.addView(
+                          b,
+                          new LinearLayout.LayoutParams(0,70,1)
+                      );
+
+                      if(item.contains("الطلاب"))
+                          b.setOnClickListener(v -> students());
+
+                      if(item.contains("الرئيسية"))
+                          b.setOnClickListener(v -> addDashboard());
+
+                      if(item.contains("الحصص"))
+                          b.setOnClickListener(v -> lessons());
+
+                      if(item.contains("الحضور"))
+                          b.setOnClickListener(v -> attendance());
+
+                      if(item.contains("الحسابات"))
+                          b.setOnClickListener(v -> money());
+                  }
+
+                  root.addView(nav);
+                  setContentView(root);
+              }
+
+              void clear() {
+                  content.removeAllViews();
+              }
+
+              void addDashboard() {
+
+                  clear();
+
+                  TextView h = text("لوحة التحكم",23);
+                  h.setTypeface(null,Typeface.BOLD);
+                  content.addView(h);
+
+                  content.addView(text(
+                      "مرحبًا بك يا أ. إبراهيم عبد الحكيم 👋",
+                      18
+                  ));
+
+                  content.addView(text(
+                      "إدارة طلابك وحصصك وحضورهم وحساباتهم من مكان واحد.",
+                      15
+                  ));
+
+                  String[] cards = {
+                      "👨‍🎓 الطلاب\nإدارة الطلاب والمجموعات",
+                      "📚 الحصص\nجدول وتسجيل الحصص",
+                      "✅ الحضور\nمتابعة حضور وغياب الطلاب",
+                      "💰 الحسابات\nالمصروفات والمدفوعات والمتبقي"
+                  };
+
+                  for(String c : cards) {
+                      TextView card = text(c,17);
+                      card.setBackgroundColor(Color.WHITE);
+                      content.addView(card);
+                  }
+              }
+
+              void students() {
+
+                  clear();
+
+                  content.addView(text("👨‍🎓 الطلاب",23));
+
+                  Button add = button("➕ إضافة طالب");
+                  content.addView(add);
+
+                  add.setOnClickListener(v -> {
+
+                      LinearLayout box = new LinearLayout(this);
+                      box.setOrientation(LinearLayout.VERTICAL);
+
+                      EditText name = new EditText(this);
+                      name.setHint("اسم الطالب");
+
+                      EditText group = new EditText(this);
+                      group.setHint("الصف / المجموعة");
+
+                      EditText phone = new EditText(this);
+                      phone.setHint("رقم الهاتف");
+
+                      box.addView(name);
+                      box.addView(group);
+                      box.addView(phone);
+
+                      new AlertDialog.Builder(this)
+                          .setTitle("إضافة طالب")
+                          .setView(box)
+                          .setPositiveButton("حفظ",null)
+                          .setNegativeButton("إلغاء",null)
+                          .show();
+                  });
+
+                  content.addView(text(
+                      "لا يوجد طلاب مسجلون حتى الآن.\nاضغط «إضافة طالب» للبدء.",
+                      16
+                  ));
+              }
+
+              void lessons() {
+                  clear();
+                  content.addView(text("📚 الحصص",23));
+                  content.addView(button("➕ تسجيل حصة"));
+                  content.addView(text(
+                      "جدول الحصص سيظهر هنا.",
+                      16
+                  ));
+              }
+
+              void attendance() {
+                  clear();
+                  content.addView(text("✅ الحضور والغياب",23));
+                  content.addView(button("➕ تسجيل حضور"));
+                  content.addView(text(
+                      "اختر المجموعة ثم سجل حضور الطلاب.",
+                      16
+                  ));
+              }
+
+              void money() {
+                  clear();
+                  content.addView(text("💰 الحسابات",23));
+                  content.addView(text(
+                      "إجمالي المستحقات\n0 جنيه",
+                      18
+                  ));
+                  content.addView(text(
+                      "المدفوعات\n0 جنيه",
+                      18
+                  ));
+                  content.addView(text(
+                      "المتبقي\n0 جنيه",
+                      18
+                  ));
+              }
+          }
+          EOF
 
       - name: Setup Java
         uses: actions/setup-java@v4
